@@ -1,0 +1,65 @@
+{
+  "plan_id": "30x40_2bhk_east",
+  "meta": {
+    "title": "30x40 Vastu-Compliant East Facing 2BHK",
+    "plot_width": 30,
+    "plot_length": 40,
+    "facing": "East",
+    "bhk": 2,
+    "floors": 1,
+    "vastu_score": 95
+  },
+  "setbacks": {
+    "front": 5,
+    "rear": 3,
+    "left": 2,
+    "right": 2
+  },
+  "rooms": [
+    {
+      "id": "parking",
+      "name": "Porch / Parking",
+      "x": 0,
+      "y": 0,
+      "width": 10,
+      "length": 18,
+      "type": "outdoor"
+    },
+    {
+      "id": "living",
+      "name": "Living Hall",
+      "x": 10,
+      "y": 0,
+      "width": 20,
+      "length": 18,
+      "type": "living"
+    },
+    {
+      "id": "kitchen",
+      "name": "Kitchen (Agneya)",
+      "x": 0,
+      "y": 18,
+      "width": 10,
+      "length": 14,
+      "type": "service"
+    },
+    {
+      "id": "common_toilet",
+      "name": "Toilet",
+      "x": 0,
+      "y": 32,
+      "width": 10,
+      "length": 8,
+      "type": "service"
+    },
+    {
+      "id": "master_bedroom",
+      "name": "Master Bed (Nairutya)",
+      "x": 10,
+      "y": 18,
+      "width": 20,
+      "length": 22,
+      "type": "bedroom"
+    }
+  ]
+}
