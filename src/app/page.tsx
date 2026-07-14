@@ -71,25 +71,11 @@ export default function Home() {
         setSelectedBhk(savedPlan.meta.bhk);
       } else {
         // If nothing is saved, load the default plan
-        const defaultPlan = findPlan(selectedSize, selectedBhk);
-        if (defaultPlan) {
-          setActivePlan(clonePlan(defaultPlan));
-        } else {
-          console.error(`Default plan for size ${selectedSize} and BHK ${selectedBhk} not found. Creating a blank plan as a fallback.`);
-          const [width, length] = selectedSize.split('x').map(Number);
-          setActivePlan({
-            plan_id: `blank_${width}x${length}_${Date.now()}`,
-            meta: { title: `Blank ${width}×${length} Plan`, plot_width: width, plot_length: length, facing: 'North', bhk: 0, floors: 1 },
-            setbacks: { front: 0, rear: 0, left: 0, right: 0 },
-            floors: [{ level: 0, label: 'Ground Floor', rooms: [], openings: [] }],
-          });
-        }
+        setActivePlan(clonePlan(findPlan(selectedSize, selectedBhk)));
       }
     } catch (error) {
       console.error('Failed to load plan from local storage, loading default.', error);
-      // Fallback to default plan. If this also fails, the app might still show a white screen.
-      const defaultPlan = findPlan(selectedSize, selectedBhk);
-      if (defaultPlan) setActivePlan(clonePlan(defaultPlan));
+      setActivePlan(clonePlan(findPlan(selectedSize, selectedBhk)));
     }
   }, []); // Run only once on mount
 
