@@ -70,12 +70,28 @@ export default function Home() {
         setSelectedSize(savedSize);
         setSelectedBhk(savedPlan.meta.bhk);
       } else {
-        // If nothing is saved, load the default plan
-        setActivePlan(clonePlan(findPlan(selectedSize, selectedBhk)));
+        const defaultPlan = findPlan(selectedSize, selectedBhk);
+        if (defaultPlan) {
+          setActivePlan(clonePlan(defaultPlan));
+        } else {
+          console.warn(`Default plan not found for ${selectedSize}. Creating a blank plan.`);
+          const [width, length] = selectedSize.split('x').map(Number);
+          setActivePlan({
+            plan_id: `blank_${width}x${length}_${Date.now()}`,
+            meta: { title: `Blank ${width}×${length} Plan`, plot_width: width, plot_length: length, facing: 'North', bhk: 0, floors: 1 },
+            setbacks: { front: 0, rear: 0, left: 0, right: 0 },
+            floors: [{ level: 0, label: 'Ground Floor', rooms: [], openings: [] }],
+          });
+        }
       }
     } catch (error) {
       console.error('Failed to load plan from local storage, loading default.', error);
-      setActivePlan(clonePlan(findPlan(selectedSize, selectedBhk)));
+      const defaultPlan = findPlan(selectedSize, selectedBhk);
+      if (defaultPlan) {
+        setActivePlan(clonePlan(defaultPlan));
+      } else {
+        alert('Critical error: Could not load any plan. Please check the console.');
+      }
     }
   }, []); // Run only once on mount
 
