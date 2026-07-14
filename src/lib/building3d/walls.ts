@@ -1,4 +1,4 @@
-import type { Floor, PlanData, Room } from '@/types/plan';
+import type { Floor, Opening, PlanData, Room } from '@/types/plan';
 import { getPlotOrientation, isFrontExteriorEdge } from './orientation';
 import {
   WALL_THICKNESS,
@@ -86,7 +86,7 @@ export function extractWallEdges(
     addEdge(map, 'z', r.maxX, r.minZ, r.maxZ, room, onPlotExterior(r, plotWidth, plotLength, 'east'));
   }
 
-  return [...map.values()];
+  return Array.from(map.values());
 }
 
 export function findStairShafts(plan: PlanData): StairShaft[] {
@@ -188,6 +188,48 @@ export function resolveOpening(
   return undefined;
 }
 
+export function findExplicitOpening(edge: WallEdge, ctx: FloorBuildContext, plan: PlanData): OpeningSpec | undefined {
+  const { plotWidth, plotLength, rooms, openings } = ctx;
+  if (!openings || openings.length === 0) return undefined;
+
+  for (const op of openings) {
+    const room = rooms.find((r) => r.id === op.hostRoomId);
+    if (!room) continue;
+
+    const r = roomToWorld(room, plotLength);
+    let onEdge = false;
+    let openingStartWorld = 0;
+
+    if (op.edge === 'top' && edge.axis === 'x' && Math.abs(edge.fixed - r.maxZ) < EPS) {
+      onEdge = true;
+      openingStartWorld = r.minX + op.offset;
+    } else if (op.edge === 'bottom' && edge.axis === 'x' && Math.abs(edge.fixed - r.minZ) < EPS) {
+      onEdge = true;
+      openingStartWorld = r.minX + op.offset;
+    } else if (op.edge === 'left' && edge.axis === 'z' && Math.abs(edge.fixed - r.minX) < EPS) {
+      onEdge = true;
+      openingStartWorld = r.minZ + op.offset;
+    } else if (op.edge === 'right' && edge.axis === 'z' && Math.abs(edge.fixed - r.maxX) < EPS) {
+      onEdge = true;
+      openingStartWorld = r.minZ + op.offset;
+    }
+
+    if (onEdge) {
+      const openingEndWorld = openingStartWorld + op.width;
+      if (edge.start < openingEndWorld - EPS && edge.end > openingStartWorld + EPS) {
+        const orient = getPlotOrientation(plan);
+        return {
+          offset: Math.max(0, openingStartWorld - edge.start),
+          size: op.width,
+          type: op.kind,
+          isMain: op.kind === 'door' && edge.isExterior && isFrontExteriorEdge(edge, orient, plotWidth, plotLength),
+        };
+      }
+    }
+  }
+  return undefined;
+}
+
 export function buildFloorContexts(plan: PlanData): FloorBuildContext[] {
   const sorted = [...plan.floors].sort((a, b) => a.level - b.level);
   const shafts = findStairShafts(plan);
@@ -201,6 +243,7 @@ export function buildFloorContexts(plan: PlanData): FloorBuildContext[] {
     slabTopY: floorSlabTopY(floor.level),
     wallTopY: floorWallTopY(floor.level),
     rooms: floor.rooms,
+    openings: floor.openings ?? [],
     edges: extractWallEdges(floor.rooms, plan.meta.plot_width, plan.meta.plot_length),
     stairShafts: shafts.filter((s) => s.level === floor.level),
     isTopFloor: floor.level === maxLevel,

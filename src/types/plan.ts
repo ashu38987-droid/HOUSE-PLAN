@@ -17,10 +17,20 @@ export interface Room {
   assets?: PlacedAsset[];
 }
 
+export interface Opening {
+  id: string;
+  kind: 'door' | 'window';
+  hostRoomId: string;
+  edge: 'top' | 'bottom' | 'left' | 'right';
+  offset: number;
+  width: number;
+}
+
 export interface Floor {
   level: number;
   label?: string;
   rooms: Room[];
+  openings?: Opening[];
 }
 
 export interface PlanData {
@@ -47,9 +57,17 @@ export type FloorSelection = number | 'all';
 
 export function getFloorLabel(level: number): string {
   if (level === 0) return 'Ground';
-  if (level === 1) return '1st Floor';
-  if (level === 2) return '2nd Floor';
-  return `Level ${level}`;
+
+  let suffix = 'th';
+  if (level % 10 === 1 && level % 100 !== 11) {
+    suffix = 'st';
+  } else if (level % 10 === 2 && level % 100 !== 12) {
+    suffix = 'nd';
+  } else if (level % 10 === 3 && level % 100 !== 13) {
+    suffix = 'rd';
+  }
+
+  return `${level}${suffix} Floor`;
 }
 
 export function getFloorByLevel(plan: PlanData, level: number): Floor | undefined {

@@ -5,10 +5,11 @@ interface FloorSwitcherProps {
   floorLevels: number[];
   selection: FloorSelection;
   onChange: (selection: FloorSelection) => void;
+  onAddFloor?: () => void;
   disabled?: boolean;
 }
 
-export default function FloorSwitcher({ floorLevels, selection, onChange, disabled }: FloorSwitcherProps) {
+export default function FloorSwitcher({ floorLevels, selection, onChange, onAddFloor, disabled }: FloorSwitcherProps) {
   const sorted = [...floorLevels].sort((a, b) => a - b);
 
   return (
@@ -41,6 +42,16 @@ export default function FloorSwitcher({ floorLevels, selection, onChange, disabl
             }`}
           >
             All Floors
+          </button>
+        )}
+        {onAddFloor && (
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={onAddFloor}
+            className="mt-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-center text-xs font-semibold text-slate-600 transition-all hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            + Add Floor
           </button>
         )}
       </div>

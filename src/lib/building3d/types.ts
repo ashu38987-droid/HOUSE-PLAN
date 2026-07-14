@@ -1,4 +1,4 @@
-import type { Room } from '@/types/plan';
+import type { Opening, Room } from '@/types/plan';
 
 export const WALL_HEIGHT = 10;
 export const WALL_THICKNESS = 0.25;
@@ -50,6 +50,7 @@ export interface FloorBuildContext {
   slabTopY: number;
   wallTopY: number;
   rooms: Room[];
+  openings: Opening[];
   edges: WallEdge[];
   stairShafts: StairShaft[];
   isTopFloor: boolean;

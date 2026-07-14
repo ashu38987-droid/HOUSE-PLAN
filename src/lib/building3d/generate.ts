@@ -17,7 +17,7 @@ import {
   type FloorBuildContext,
   type OpeningSpec,
 } from './types';
-import { buildFloorContexts, resolveOpening, shouldSkipWallForShaft } from './walls';
+import { buildFloorContexts, findExplicitOpening, resolveOpening, shouldSkipWallForShaft } from './walls';
 
 const FLOOR_COLORS: Record<string, string> = {
   bedroom: '#ede7dc',
@@ -172,7 +172,11 @@ function buildFloorLevel(ctx: FloorBuildContext, opacity: number, plan: PlanData
 
   for (const edge of ctx.edges) {
     if (shouldSkipWallForShaft(edge, ctx)) continue;
-    const opening = resolveOpening(edge, ctx.rooms, plan);
+    let opening = findExplicitOpening(edge, ctx, plan);
+    if (!opening) {
+      // Fallback to procedural opening if no explicit one is found on this wall
+      opening = resolveOpening(edge, ctx.rooms, plan);
+    }
     g.add(buildWallMesh(edge, wallBaseY, wallHeight, wallMat, opening));
   }
 
@@ -209,6 +213,32 @@ export function buildBuilding(plan: PlanData, floorSelection: FloorSelection): T
   const ground = contexts.find((c) => c.level === 0);
   if (ground) {
     root.add(buildFrontElevation(plan, ground, floorSelection === 'all' || floorSelection === 0 ? 1 : 0.35));
+  }
+
+  return root;
+}
+
+export function exportBuilding(plan: PlanData, floorSelection: FloorSelection): THREE.Group {
+  const root = new THREE.Group();
+  const contexts = buildFloorContexts(plan);
+
+  root.add(buildLandscape(plan));
+
+  const levelsToRender =
+    floorSelection === 'all'
+      ? contexts.map((c) => c.level)
+      : contexts.filter((c) => c.level <= (floorSelection as number)).map((c) => c.level);
+
+  for (const ctx of contexts) {
+    if (!levelsToRender.includes(ctx.level)) continue;
+    // For export, opacity is always 1
+    root.add(buildFloorLevel(ctx, 1, plan));
+  }
+
+  const ground = contexts.find((c) => c.level === 0);
+  if (ground && levelsToRender.includes(0)) {
+    // Add front elevation with full opacity if ground floor is rendered
+    root.add(buildFrontElevation(plan, ground, 1));
   }
 
   return root;

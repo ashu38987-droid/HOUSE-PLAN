@@ -9,12 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "jspdf": "^2.5.2",
+    "nanoid": "^3.3.7",
     "next": "^16.2.10",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "three": "^0.163.0"
   },
   "devDependencies": {
+    "@types/jspdf": "^2.0.0",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
